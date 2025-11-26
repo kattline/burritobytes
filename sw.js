@@ -1,15 +1,14 @@
-var cacheName = "burrito-bytes-pwa";
+var cacheName = "burritobyteS";
 var filesToCache = [
   "/",
   "/index.html",
   "/style.css",
   "/app.js",
   "/fallback.html",
+  "/manifest.json",
   "https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js",
   "https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"
 ];
-
-// ... rest of your existing service worker code remains exactly the same ...
 
 // Install Event
 self.addEventListener("install", async (e) => {

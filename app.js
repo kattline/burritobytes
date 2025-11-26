@@ -1,4 +1,4 @@
-// Firebase Configuration
+// ---------------- FIREBASE CONFIGURATION ----------------
 const firebaseConfig = {
   apiKey: "AIzaSyCGg-TXDVDfMsQnypWvC8kKWWp85WPrUgg",
   authDomain: "burrito-bytes.firebaseapp.com",
@@ -10,14 +10,16 @@ const firebaseConfig = {
   measurementId: "G-3NSJ2FNC2F"
 };
 
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
+// ---------------- GLOBAL VARIABLES ----------------
 let isEditMode = false;
 let currentEditingItem = null;
 let itemsToDelete = null;
 
-// Load Menu from Firebase
+// ---------------- LOAD MENU FROM FIREBASE ----------------
 function loadMenu() {
   const menuRef = database.ref('menu');
   
@@ -33,53 +35,56 @@ function loadMenu() {
   });
 }
 
+// ---------------- INITIALIZE DEFAULT MENU ----------------
 function initializeDefaultMenu() {
   const defaultMenu = {
-    burrito: [
-      { id: generateId(), name: "Chicken & Fries Burrito", price: 145 },
-      { id: generateId(), name: "Sausage & Egg Burrito", price: 135 },
-      { id: generateId(), name: "Beef Burrito", price: 155 },
-      { id: generateId(), name: "Pork Burrito", price: 145 }
-    ],
-    birria: [
-      { id: generateId(), name: "Beef Birria (1 piece)", price: 180 },
-      { id: generateId(), name: "Beef Birria (2 pieces)", price: 260 },
-      { id: generateId(), name: "Chicken Birria (1 piece)", price: 180 },
-      { id: generateId(), name: "Chicken Birria (2 pieces)", price: 260 }
-    ],
-    quesadilla: [
-      { id: generateId(), name: "Beef Quesadilla", price: 130 },
-      { id: generateId(), name: "Chicken Quesadilla", price: 120 },
-      { id: generateId(), name: "Cheesy Quesadilla", price: 100 },
-      { id: generateId(), name: "Spinach Quesadilla", price: 140 }
-    ]
+    burrito: {
+      item1: { id: '1', name: "Chicken & Fries Burrito", price: 145 },
+      item2: { id: '2', name: "Sausage & Egg Burrito", price: 135 },
+      item3: { id: '3', name: "Beef Burrito", price: 155 },
+      item4: { id: '4', name: "Pork Burrito", price: 145 }
+    },
+    birria: {
+      item1: { id: '5', name: "Beef Birria (1 piece)", price: 180 },
+      item2: { id: '6', name: "Beef Birria (2 pieces)", price: 260 },
+      item3: { id: '7', name: "Chicken Birria (1 piece)", price: 180 },
+      item4: { id: '8', name: "Chicken Birria (2 pieces)", price: 260 }
+    },
+    quesadilla: {
+      item1: { id: '9', name: "Beef Quesadilla", price: 130 },
+      item2: { id: '10', name: "Chicken Quesadilla", price: 120 },
+      item3: { id: '11', name: "Cheesy Quesadilla", price: 100 },
+      item4: { id: '12', name: "Spinach Quesadilla", price: 140 }
+    }
   };
   
   database.ref('menu').set(defaultMenu);
 }
 
+// ---------------- DISPLAY MENU ----------------
 function displayMenu(menuData) {
   const menuSection = document.getElementById("menu");
 
   const html = `
     <h2>🌯 Burrito</h2>
     <div class="grid">
-      ${(menuData.burrito || []).map(item => createCardHTML(item, 'burrito')).join("")}
+      ${Object.values(menuData.burrito || {}).map(item => createCardHTML(item, 'burrito')).join("")}
     </div>
 
     <h2>🌮 Birria Tacos</h2>
     <div class="grid">
-      ${(menuData.birria || []).map(item => createCardHTML(item, 'birria')).join("")}
+      ${Object.values(menuData.birria || {}).map(item => createCardHTML(item, 'birria')).join("")}
     </div>
 
     <h2>🧀 Quesadilla</h2>
     <div class="grid">
-      ${(menuData.quesadilla || []).map(item => createCardHTML(item, 'quesadilla')).join("")}
+      ${Object.values(menuData.quesadilla || {}).map(item => createCardHTML(item, 'quesadilla')).join("")}
     </div>
   `;
 
   menuSection.innerHTML = html;
   
+  // Add event listeners to edit and delete buttons
   if (isEditMode) {
     document.querySelectorAll('.edit-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -102,6 +107,7 @@ function displayMenu(menuData) {
   }
 }
 
+// ---------------- CREATE CARD HTML ----------------
 function createCardHTML(item, category) {
   return `
     <div class="card" data-id="${item.id}" data-category="${category}">
@@ -117,7 +123,7 @@ function createCardHTML(item, category) {
   `;
 }
 
-// Modal Functions
+// ---------------- MODAL FUNCTIONS ----------------
 function openModal() {
   document.getElementById('itemModal').style.display = 'block';
 }
@@ -140,7 +146,7 @@ function closeDeleteModal() {
   itemsToDelete = null;
 }
 
-// CRUD Operations
+// ---------------- CRUD OPERATIONS ----------------
 function addItem(itemData) {
   const { category, name, price } = itemData;
   const newItem = {
@@ -149,7 +155,8 @@ function addItem(itemData) {
     price: parseInt(price)
   };
   
-  database.ref(`menu/${category}`).push(newItem);
+  const newItemKey = database.ref().child('menu').child(category).push().key;
+  database.ref(`menu/${category}/${newItemKey}`).set(newItem);
 }
 
 function editItem(itemId, category) {
@@ -159,6 +166,7 @@ function editItem(itemId, category) {
     const menuData = snapshot.val();
     const categoryItems = menuData[category];
     
+    // Find the item by id
     let itemToEdit = null;
     let itemKey = null;
     
@@ -176,7 +184,10 @@ function editItem(itemId, category) {
       document.getElementById('category').value = category;
       document.getElementById('name').value = itemToEdit.name;
       document.getElementById('price').value = itemToEdit.price;
+      
+      // Disable category selection when editing
       document.getElementById('category').disabled = true;
+      
       openModal();
     }
   });
@@ -203,6 +214,7 @@ function deleteItem(itemId, category) {
     const menuData = snapshot.val();
     const categoryItems = menuData[category];
     
+    // Find the item key by id
     let itemKey = null;
     Object.keys(categoryItems).forEach(key => {
       if (categoryItems[key].id === itemId) {
@@ -222,6 +234,7 @@ function confirmDelete(itemId, category, itemName) {
   openDeleteModal();
 }
 
+// ---------------- TOGGLE EDIT MODE ----------------
 function toggleEditMode() {
   isEditMode = !isEditMode;
   const toggleBtn = document.getElementById('toggleEditBtn');
@@ -236,23 +249,32 @@ function toggleEditMode() {
     toggleBtn.style.background = '#ff8c42';
   }
   
+  // Reload menu to show/hide edit buttons
   const menuRef = database.ref('menu');
   menuRef.once('value').then((snapshot) => {
     displayMenu(snapshot.val());
   });
 }
 
+// ---------------- UTILITY FUNCTIONS ----------------
 function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
-// Event Listeners
+// ---------------- EVENT LISTENERS ----------------
 document.addEventListener('DOMContentLoaded', function() {
+  // Load menu
   loadMenu();
   
-  document.getElementById('addItemBtn').addEventListener('click', openModal);
+  // Admin controls
+  document.getElementById('addItemBtn').addEventListener('click', () => {
+    document.getElementById('category').disabled = false;
+    openModal();
+  });
+  
   document.getElementById('toggleEditBtn').addEventListener('click', toggleEditMode);
   
+  // Modal events
   document.getElementById('itemForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -272,8 +294,9 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   document.querySelector('.close').addEventListener('click', closeModal);
-  document.querySelector('#cancelBtn').addEventListener('click', closeModal);
+  document.querySelector('.cancel-btn').addEventListener('click', closeModal);
   
+  // Delete modal events
   document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
     if (itemsToDelete) {
       deleteItem(itemsToDelete.itemId, itemsToDelete.category);
@@ -283,16 +306,21 @@ document.addEventListener('DOMContentLoaded', function() {
   
   document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteModal);
   
+  // Close modals when clicking outside
   window.addEventListener('click', function(e) {
     const itemModal = document.getElementById('itemModal');
     const deleteModal = document.getElementById('deleteModal');
     
-    if (e.target === itemModal) closeModal();
-    if (e.target === deleteModal) closeDeleteModal();
+    if (e.target === itemModal) {
+      closeModal();
+    }
+    if (e.target === deleteModal) {
+      closeDeleteModal();
+    }
   });
 });
 
-// PWA Installation (Original Code)
+// ---------------- PWA INSTALLATION ----------------
 let deferredPrompt;
 
 window.addEventListener("beforeinstallprompt", (e) => {
@@ -315,6 +343,7 @@ window.addEventListener("beforeinstallprompt", (e) => {
   });
 });
 
+// ---------------- CLOSE BANNER ----------------
 document.querySelector(".close-banner-btn").addEventListener("click", () => {
   const banner = document.getElementById("app-notification-banner");
   banner.style.transform = "translateX(-50%) translateY(120%)";
@@ -327,6 +356,7 @@ setTimeout(() => {
   if (banner) banner.classList.add("slide-in");
 }, 1000);
 
+// ---------------- SERVICE WORKER ----------------
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js");
 }
