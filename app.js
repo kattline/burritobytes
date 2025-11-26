@@ -1,4 +1,4 @@
-// ---------------- FIREBASE CONFIGURATION ----------------
+// Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCGg-TXDVDfMsQnypWvC8kKWWp85WPrUgg",
   authDomain: "burrito-bytes.firebaseapp.com",
@@ -10,16 +10,14 @@ const firebaseConfig = {
   measurementId: "G-3NSJ2FNC2F"
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
-// ---------------- GLOBAL VARIABLES ----------------
 let isEditMode = false;
 let currentEditingItem = null;
 let itemsToDelete = null;
 
-// ---------------- LOAD MENU FROM FIREBASE ----------------
+// Load Menu from Firebase
 function loadMenu() {
   const menuRef = database.ref('menu');
   
@@ -35,7 +33,6 @@ function loadMenu() {
   });
 }
 
-// ---------------- INITIALIZE DEFAULT MENU ----------------
 function initializeDefaultMenu() {
   const defaultMenu = {
     burrito: [
@@ -61,7 +58,6 @@ function initializeDefaultMenu() {
   database.ref('menu').set(defaultMenu);
 }
 
-// ---------------- DISPLAY MENU ----------------
 function displayMenu(menuData) {
   const menuSection = document.getElementById("menu");
 
@@ -84,7 +80,6 @@ function displayMenu(menuData) {
 
   menuSection.innerHTML = html;
   
-  // Add event listeners to action buttons
   if (isEditMode) {
     document.querySelectorAll('.edit-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -107,7 +102,6 @@ function displayMenu(menuData) {
   }
 }
 
-// ---------------- CREATE CARD HTML ----------------
 function createCardHTML(item, category) {
   return `
     <div class="card" data-id="${item.id}" data-category="${category}">
@@ -123,7 +117,7 @@ function createCardHTML(item, category) {
   `;
 }
 
-// ---------------- MODAL FUNCTIONS ----------------
+// Modal Functions
 function openModal() {
   document.getElementById('itemModal').style.display = 'block';
 }
@@ -146,7 +140,7 @@ function closeDeleteModal() {
   itemsToDelete = null;
 }
 
-// ---------------- CRUD OPERATIONS ----------------
+// CRUD Operations
 function addItem(itemData) {
   const { category, name, price } = itemData;
   const newItem = {
@@ -165,7 +159,6 @@ function editItem(itemId, category) {
     const menuData = snapshot.val();
     const categoryItems = menuData[category];
     
-    // Find the item by id
     let itemToEdit = null;
     let itemKey = null;
     
@@ -183,10 +176,7 @@ function editItem(itemId, category) {
       document.getElementById('category').value = category;
       document.getElementById('name').value = itemToEdit.name;
       document.getElementById('price').value = itemToEdit.price;
-      
-      // Disable category selection when editing
       document.getElementById('category').disabled = true;
-      
       openModal();
     }
   });
@@ -213,7 +203,6 @@ function deleteItem(itemId, category) {
     const menuData = snapshot.val();
     const categoryItems = menuData[category];
     
-    // Find the item key by id
     let itemKey = null;
     Object.keys(categoryItems).forEach(key => {
       if (categoryItems[key].id === itemId) {
@@ -233,7 +222,6 @@ function confirmDelete(itemId, category, itemName) {
   openDeleteModal();
 }
 
-// ---------------- TOGGLE EDIT MODE ----------------
 function toggleEditMode() {
   isEditMode = !isEditMode;
   const toggleBtn = document.getElementById('toggleEditBtn');
@@ -244,32 +232,27 @@ function toggleEditMode() {
     toggleBtn.style.background = '#e74c3c';
   } else {
     document.body.classList.remove('edit-mode');
-    toggleBtn.textContent = '✏️ Edit';
+    toggleBtn.textContent = '✏️ Edit Mode';
     toggleBtn.style.background = '#ff8c42';
   }
   
-  // Reload menu to show/hide edit buttons
   const menuRef = database.ref('menu');
   menuRef.once('value').then((snapshot) => {
     displayMenu(snapshot.val());
   });
 }
 
-// ---------------- UTILITY FUNCTIONS ----------------
 function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
-// ---------------- EVENT LISTENERS ----------------
+// Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
-  // Load menu
   loadMenu();
   
-  // Admin controls
   document.getElementById('addItemBtn').addEventListener('click', openModal);
   document.getElementById('toggleEditBtn').addEventListener('click', toggleEditMode);
   
-  // Modal events
   document.getElementById('itemForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -289,9 +272,8 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   document.querySelector('.close').addEventListener('click', closeModal);
-  document.getElementById('cancelBtn').addEventListener('click', closeModal);
+  document.querySelector('#cancelBtn').addEventListener('click', closeModal);
   
-  // Delete modal events
   document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
     if (itemsToDelete) {
       deleteItem(itemsToDelete.itemId, itemsToDelete.category);
@@ -301,7 +283,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteModal);
   
-  // Close modals when clicking outside
   window.addEventListener('click', function(e) {
     const itemModal = document.getElementById('itemModal');
     const deleteModal = document.getElementById('deleteModal');
@@ -311,7 +292,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-// ---------------- PWA INSTALLATION (KEEP EXISTING) ----------------
+// PWA Installation (Original Code)
 let deferredPrompt;
 
 window.addEventListener("beforeinstallprompt", (e) => {

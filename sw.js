@@ -9,6 +9,8 @@ var filesToCache = [
   "https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"
 ];
 
+// ... rest of your existing service worker code remains exactly the same ...
+
 // Install Event
 self.addEventListener("install", async (e) => {
   console.log("Service Worker: Installing...");
@@ -38,10 +40,8 @@ self.addEventListener("activate", async (e) => {
 self.addEventListener("fetch", (event) => {
   const request = event.request;
 
-  // Only same-origin and Firebase requests
-  if (request.url.startsWith(self.location.origin) || 
-      request.url.includes('firebaseio.com') ||
-      request.url.includes('gstatic.com/firebasejs')) {
+  // Only same-origin
+  if (request.url.startsWith(self.location.origin)) {
 
     // Network-first for HTML
     if (request.headers.get("accept")?.includes("text/html")) {
@@ -59,11 +59,9 @@ self.addEventListener("fetch", (event) => {
       return;
     }
 
-    // Cache-first for CSS, JS, Images, and Firebase SDK
+    // Cache-first for CSS, JS, Images
     event.respondWith(
-      caches.match(request).then((cached) => {
-        return cached || fetch(request);
-      })
+      caches.match(request).then((cached) => cached || fetch(request))
     );
   }
 });

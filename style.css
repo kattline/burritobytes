@@ -1,4 +1,183 @@
-/* ---------------- ADMIN CONTROLS ---------------- */
+/* ---------------- GLOBAL ---------------- */
+body {
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  background: #fff8f0;
+  color: #5a3e2b;
+}
+
+/* ---------------- HEADER ---------------- */
+header {
+  background: linear-gradient(135deg, #ff6b2d, #d35400);
+  padding: 40px 20px;
+  color: white;
+  text-align: center;
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+header h1 {
+  font-size: 38px;
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.tagline {
+  font-size: 14px;
+  margin-top: 12px;
+  opacity: 0.95;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.hours {
+  font-size: 13px;
+  margin-top: 10px;
+  opacity: 0.9;
+}
+
+/* ---------------- CATEGORY TITLE ---------------- */
+h2 {
+  margin: 40px 20px 10px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #d35400;
+  position: relative;
+}
+
+h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 50px;
+  height: 4px;
+  background: #ff9e4a;
+  border-radius: 2px;
+}
+
+/* ---------------- GRID LAYOUT ---------------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+/* ---------------- FOOD CARD ---------------- */
+.card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 20px;
+
+  /* neumorphic shadow */
+  box-shadow:
+    4px 4px 12px rgba(0,0,0,0.12),
+    -4px -4px 12px rgba(255,255,255,0.8);
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    6px 6px 16px rgba(0,0,0,0.18),
+    -4px -4px 12px rgba(255,255,255,0.9);
+}
+
+.card h3 {
+  font-size: 18px;
+  margin: 0 0 10px;
+  font-weight: 600;
+  color: #3e2a1d;
+}
+
+.price {
+  font-size: 20px;
+  color: #e15c1d;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+/* Notification Banner */
+.app-notification-banner {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(120%);
+  width: 90%;
+  max-width: 450px;
+  background: #ffebc8;
+  border-left: 6px solid #ff8c42;
+  border-radius: 12px;
+  padding: 15px 18px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+  font-size: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  z-index: 9999;
+  opacity: 0;
+  transition: all 0.45s ease;
+}
+
+/* Slide in animation */
+.app-notification-banner.slide-in {
+  transform: translateX(-50%) translateY(0%);
+  opacity: 1;
+}
+
+/* Inside content */
+.banner-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* Install button */
+.install-btn {
+  margin-top: 6px;
+  padding: 7px 12px;
+  background: #ff8c42;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.install-btn:hover {
+  background: #ff7a1f;
+}
+
+/* Close button */
+.close-banner-btn {
+  background: #ff8c42;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: 0.2s;
+}
+
+.close-banner-btn:hover {
+  background: #ff7a1f;
+}
+
+/* Admin Controls */
 .admin-controls {
   position: fixed;
   top: 20px;
@@ -8,24 +187,7 @@
   gap: 10px;
 }
 
-.admin-btn {
-  background: #ff8c42;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  transition: 0.2s;
-}
-
-.admin-btn:hover {
-  background: #ff7a1f;
-  transform: translateY(-2px);
-}
-
-/* ---------------- MODAL STYLES ---------------- */
+/* Modal */
 .modal {
   display: none;
   position: fixed;
@@ -35,17 +197,16 @@
   width: 100%;
   height: 100%;
   background-color: rgba(0,0,0,0.5);
-  backdrop-filter: blur(5px);
 }
 
 .modal-content {
-  background-color: #fff8f0;
+  background-color: #ffffff;
   margin: 10% auto;
   padding: 30px;
   border-radius: 20px;
   width: 90%;
   max-width: 500px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   position: relative;
 }
 
@@ -64,7 +225,7 @@
   color: #d35400;
 }
 
-/* ---------------- FORM STYLES ---------------- */
+/* Form Styles */
 .form-group {
   margin-bottom: 20px;
 }
@@ -91,7 +252,6 @@
 .form-group select:focus {
   outline: none;
   border-color: #d35400;
-  box-shadow: 0 0 0 3px rgba(211, 84, 0, 0.1);
 }
 
 .form-actions {
@@ -101,178 +261,7 @@
   margin-top: 25px;
 }
 
-.form-actions button {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.2s;
-}
-
-#saveBtn, #confirmDeleteBtn {
-  background: #d35400;
-  color: white;
-}
-
-#saveBtn:hover, #confirmDeleteBtn:hover {
-  background: #b84300;
-}
-
-#cancelBtn, #cancelDeleteBtn {
-  background: #95a5a6;
-  color: white;
-}
-
-#cancelBtn:hover, #cancelDeleteBtn:hover {
-  background: #7f8c8d;
-}
-
-.delete-btn {
-  background: #e74c3c !important;
-}
-
-.delete-btn:hover {
-  background: #c0392b !important;
-}
-
-/* ---------------- ADMIN CONTROLS ---------------- */
-.admin-controls {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1000;
-  display: flex;
-  gap: 10px;
-}
-
-.admin-btn {
-  background: #ff8c42;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  transition: 0.2s;
-}
-
-.admin-btn:hover {
-  background: #ff7a1f;
-  transform: translateY(-2px);
-}
-
-/* ---------------- MODAL STYLES ---------------- */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 2000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.5);
-}
-
-.modal-content {
-  background-color: #fff8f0;
-  margin: 10% auto;
-  padding: 30px;
-  border-radius: 20px;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-  position: relative;
-}
-
-.close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
-  position: absolute;
-  right: 20px;
-  top: 15px;
-}
-
-.close:hover {
-  color: #d35400;
-}
-
-/* ---------------- FORM STYLES ---------------- */
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: #5a3e2b;
-}
-
-.form-group input,
-.form-group select {
-  width: 100%;
-  padding: 12px;
-  border: 2px solid #ff9e4a;
-  border-radius: 10px;
-  font-size: 16px;
-  background: white;
-  box-sizing: border-box;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: #d35400;
-}
-
-.form-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-top: 25px;
-}
-
-.form-actions button {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.2s;
-}
-
-#saveBtn, #confirmDeleteBtn {
-  background: #d35400;
-  color: white;
-}
-
-#saveBtn:hover, #confirmDeleteBtn:hover {
-  background: #b84300;
-}
-
-#cancelBtn, #cancelDeleteBtn {
-  background: #95a5a6;
-  color: white;
-}
-
-#cancelBtn:hover, #cancelDeleteBtn:hover {
-  background: #7f8c8d;
-}
-
-.delete-btn {
-  background: #e74c3c !important;
-}
-
-.delete-btn:hover {
-  background: #c0392b !important;
-}
-
-/* ---------------- EDIT MODE STYLES ---------------- */
+/* Edit Mode */
 .edit-mode .card {
   position: relative;
 }

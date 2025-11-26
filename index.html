@@ -7,26 +7,17 @@
 
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
-  
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
-  <div id="app-notification-banner" class="app-notification-banner">
-    <div class="banner-content">
-      📱 <strong>Install Burrito Bytes Menu App</strong> for a better experience!
-      <button id="installBtn" class="install-btn">Download Now</button>
+    <div id="app-notification-banner" class="app-notification-banner slide-in">
+  <div class="banner-content">
+    📱 <strong>Install Burrito Bytes Menu App</strong> for a better experience!
+    <button id="installBtn" class="install-btn">Download Now</button>
+  </div>
+  <button class="close-banner-btn" aria-label="Dismiss notification">✕</button>
     </div>
-    <button class="close-banner-btn" aria-label="Dismiss notification">✕</button>
-  </div>
 
-  <!-- Admin Controls -->
-  <div class="admin-controls">
-    <button id="addItemBtn" class="admin-btn">+ Add New Item</button>
-    <button id="toggleEditBtn" class="admin-btn">✏️ Edit Mode</button>
-  </div>
 
   <header>
     <h1>🌯 Burrito Bytes</h1>
@@ -37,14 +28,15 @@
 
   <section id="menu"></section>
 
-  <!-- Add/Edit Modal -->
+  <script src="app.js"></script>
+
+  <!-- Add Modal -->
 <div id="itemModal" class="modal">
   <div class="modal-content">
     <span class="close">&times;</span>
     <h2 id="modalTitle">Add New Item</h2>
     <form id="itemForm">
       <input type="hidden" id="itemId">
-      
       <div class="form-group">
         <label for="category">Category:</label>
         <select id="category" required>
@@ -54,43 +46,39 @@
           <option value="quesadilla">Quesadilla</option>
         </select>
       </div>
-      
       <div class="form-group">
         <label for="name">Item Name:</label>
         <input type="text" id="name" required>
       </div>
-      
       <div class="form-group">
         <label for="price">Price (₱):</label>
         <input type="number" id="price" min="0" required>
       </div>
-      
       <div class="form-actions">
-        <button type="submit" id="saveBtn">Save Item</button>
-        <button type="button" id="cancelBtn">Cancel</button>
+        <button type="submit" class="install-btn">Save Item</button>
+        <button type="button" class="close-banner-btn">Cancel</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
+<!-- Delete Modal -->
 <div id="deleteModal" class="modal">
   <div class="modal-content">
     <h2>Confirm Delete</h2>
     <p>Are you sure you want to delete "<span id="deleteItemName"></span>"?</p>
     <div class="form-actions">
-      <button id="confirmDeleteBtn" class="delete-btn">Delete</button>
-      <button id="cancelDeleteBtn">Cancel</button>
+      <button id="confirmDeleteBtn" class="install-btn" style="background:#e74c3c">Delete</button>
+      <button id="cancelDeleteBtn" class="close-banner-btn">Cancel</button>
     </div>
   </div>
 </div>
 
-<!-- Admin Controls -->
+<!-- Admin Buttons -->
 <div class="admin-controls">
-  <button id="addItemBtn" class="admin-btn">+ Add Item</button>
-  <button id="toggleEditBtn" class="admin-btn">✏️ Edit</button>
+  <button id="addItemBtn" class="install-btn">+ Add Item</button>
+  <button id="toggleEditBtn" class="install-btn">✏️ Edit Mode</button>
 </div>
 
-  <script src="app.js"></script>
 </body>
 </html>
