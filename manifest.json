@@ -1,12 +1,22 @@
 {
-  "name": "Burrito Bytes Menu",
+  "name": "Burrito Bytes",
   "short_name": "BurritoBytes",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#d14224",
+  "theme_color": "#d35400",
+  "description": "Digital API-powered menu for Burrito Bytes.",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
-  ]
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "orientation": "portrait"
 }

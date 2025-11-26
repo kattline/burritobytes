@@ -18,92 +18,118 @@ const database = firebase.database();
 let isEditMode = false;
 let currentEditingItem = null;
 let itemsToDelete = null;
+let deferredPrompt;
+
+// ---------------- DEFAULT MENU DATA ----------------
+const defaultMenuData = {
+  burrito: [
+    { id: '1', name: "Chicken & Fries Burrito", price: 145 },
+    { id: '2', name: "Sausage & Egg Burrito", price: 135 },
+    { id: '3', name: "Beef Burrito", price: 155 },
+    { id: '4', name: "Pork Burrito", price: 145 }
+  ],
+  birria: [
+    { id: '5', name: "Beef Birria (1 piece)", price: 180 },
+    { id: '6', name: "Beef Birria (2 pieces)", price: 260 },
+    { id: '7', name: "Chicken Birria (1 piece)", price: 180 },
+    { id: '8', name: "Chicken Birria (2 pieces)", price: 260 }
+  ],
+  quesadilla: [
+    { id: '9', name: "Beef Quesadilla", price: 130 },
+    { id: '10', name: "Chicken Quesadilla", price: 120 },
+    { id: '11', name: "Cheesy Quesadilla", price: 100 },
+    { id: '12', name: "Spinach Quesadilla", price: 140 }
+  ]
+};
 
 // ---------------- LOAD MENU FROM FIREBASE ----------------
 function loadMenu() {
+  console.log("Loading menu from Firebase...");
   const menuRef = database.ref('menu');
   
   menuRef.on('value', (snapshot) => {
     const menuData = snapshot.val();
+    console.log("Firebase data:", menuData);
     
     if (!menuData) {
+      console.log("No data in Firebase, initializing default menu...");
       initializeDefaultMenu();
-      return;
+    } else {
+      console.log("Displaying menu from Firebase");
+      displayMenu(menuData);
     }
-    
-    displayMenu(menuData);
+  }, (error) => {
+    console.error("Firebase error:", error);
+    // Fallback to default data if Firebase fails
+    displayMenu(defaultMenuData);
   });
 }
 
 // ---------------- INITIALIZE DEFAULT MENU ----------------
 function initializeDefaultMenu() {
-  const defaultMenu = {
-    burrito: {
-      item1: { id: '1', name: "Chicken & Fries Burrito", price: 145 },
-      item2: { id: '2', name: "Sausage & Egg Burrito", price: 135 },
-      item3: { id: '3', name: "Beef Burrito", price: 155 },
-      item4: { id: '4', name: "Pork Burrito", price: 145 }
-    },
-    birria: {
-      item1: { id: '5', name: "Beef Birria (1 piece)", price: 180 },
-      item2: { id: '6', name: "Beef Birria (2 pieces)", price: 260 },
-      item3: { id: '7', name: "Chicken Birria (1 piece)", price: 180 },
-      item4: { id: '8', name: "Chicken Birria (2 pieces)", price: 260 }
-    },
-    quesadilla: {
-      item1: { id: '9', name: "Beef Quesadilla", price: 130 },
-      item2: { id: '10', name: "Chicken Quesadilla", price: 120 },
-      item3: { id: '11', name: "Cheesy Quesadilla", price: 100 },
-      item4: { id: '12', name: "Spinach Quesadilla", price: 140 }
-    }
-  };
+  console.log("Initializing default menu in Firebase...");
   
-  database.ref('menu').set(defaultMenu);
+  // Convert array to object format for Firebase
+  const firebaseMenuData = {};
+  
+  Object.keys(defaultMenuData).forEach(category => {
+    firebaseMenuData[category] = {};
+    defaultMenuData[category].forEach((item, index) => {
+      firebaseMenuData[category][`item${index + 1}`] = item;
+    });
+  });
+  
+  database.ref('menu').set(firebaseMenuData)
+    .then(() => {
+      console.log("Default menu saved to Firebase");
+      displayMenu(firebaseMenuData);
+    })
+    .catch((error) => {
+      console.error("Error saving to Firebase:", error);
+      // Display default data even if Firebase fails
+      displayMenu(defaultMenuData);
+    });
 }
 
 // ---------------- DISPLAY MENU ----------------
 function displayMenu(menuData) {
   const menuSection = document.getElementById("menu");
+  console.log("Displaying menu:", menuData);
 
-  const html = `
-    <h2>🌯 Burrito</h2>
-    <div class="grid">
-      ${Object.values(menuData.burrito || {}).map(item => createCardHTML(item, 'burrito')).join("")}
-    </div>
+  let html = '';
 
-    <h2>🌮 Birria Tacos</h2>
-    <div class="grid">
-      ${Object.values(menuData.birria || {}).map(item => createCardHTML(item, 'birria')).join("")}
-    </div>
+  // Burrito Section
+  html += `<h2>🌯 Burrito</h2><div class="grid">`;
+  if (menuData.burrito) {
+    const burritoItems = Array.isArray(menuData.burrito) ? 
+      menuData.burrito : Object.values(menuData.burrito);
+    html += burritoItems.map(item => createCardHTML(item, 'burrito')).join("");
+  }
+  html += `</div>`;
 
-    <h2>🧀 Quesadilla</h2>
-    <div class="grid">
-      ${Object.values(menuData.quesadilla || {}).map(item => createCardHTML(item, 'quesadilla')).join("")}
-    </div>
-  `;
+  // Birria Section
+  html += `<h2>🌮 Birria Tacos</h2><div class="grid">`;
+  if (menuData.birria) {
+    const birriaItems = Array.isArray(menuData.birria) ? 
+      menuData.birria : Object.values(menuData.birria);
+    html += birriaItems.map(item => createCardHTML(item, 'birria')).join("");
+  }
+  html += `</div>`;
+
+  // Quesadilla Section
+  html += `<h2>🧀 Quesadilla</h2><div class="grid">`;
+  if (menuData.quesadilla) {
+    const quesadillaItems = Array.isArray(menuData.quesadilla) ? 
+      menuData.quesadilla : Object.values(menuData.quesadilla);
+    html += quesadillaItems.map(item => createCardHTML(item, 'quesadilla')).join("");
+  }
+  html += `</div>`;
 
   menuSection.innerHTML = html;
   
-  // Add event listeners to edit and delete buttons
+  // Add event listeners to action buttons if in edit mode
   if (isEditMode) {
-    document.querySelectorAll('.edit-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const itemId = btn.closest('.card').dataset.id;
-        const category = btn.closest('.card').dataset.category;
-        editItem(itemId, category);
-      });
-    });
-    
-    document.querySelectorAll('.delete-card-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const itemId = btn.closest('.card').dataset.id;
-        const category = btn.closest('.card').dataset.category;
-        const itemName = btn.closest('.card').querySelector('h3').textContent;
-        confirmDelete(itemId, category, itemName);
-      });
-    });
+    attachEditDeleteListeners();
   }
 }
 
@@ -121,6 +147,30 @@ function createCardHTML(item, category) {
       <p class="price">₱${item.price}</p>
     </div>
   `;
+}
+
+// ---------------- ATTACH EDIT/DELETE LISTENERS ----------------
+function attachEditDeleteListeners() {
+  document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const card = btn.closest('.card');
+      const itemId = card.dataset.id;
+      const category = card.dataset.category;
+      editItem(itemId, category);
+    });
+  });
+  
+  document.querySelectorAll('.delete-card-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const card = btn.closest('.card');
+      const itemId = card.dataset.id;
+      const category = card.dataset.category;
+      const itemName = card.querySelector('h3').textContent;
+      confirmDelete(itemId, category, itemName);
+    });
+  });
 }
 
 // ---------------- MODAL FUNCTIONS ----------------
@@ -155,8 +205,14 @@ function addItem(itemData) {
     price: parseInt(price)
   };
   
-  const newItemKey = database.ref().child('menu').child(category).push().key;
-  database.ref(`menu/${category}/${newItemKey}`).set(newItem);
+  const newItemKey = 'item' + Date.now();
+  database.ref(`menu/${category}/${newItemKey}`).set(newItem)
+    .then(() => {
+      console.log("Item added successfully");
+    })
+    .catch((error) => {
+      console.error("Error adding item:", error);
+    });
 }
 
 function editItem(itemId, category) {
@@ -184,10 +240,7 @@ function editItem(itemId, category) {
       document.getElementById('category').value = category;
       document.getElementById('name').value = itemToEdit.name;
       document.getElementById('price').value = itemToEdit.price;
-      
-      // Disable category selection when editing
       document.getElementById('category').disabled = true;
-      
       openModal();
     }
   });
@@ -203,7 +256,13 @@ function updateItem(itemData) {
       price: parseInt(price)
     };
     
-    database.ref(`menu/${category}/${currentEditingItem.itemKey}`).set(updatedItem);
+    database.ref(`menu/${category}/${currentEditingItem.itemKey}`).set(updatedItem)
+      .then(() => {
+        console.log("Item updated successfully");
+      })
+      .catch((error) => {
+        console.error("Error updating item:", error);
+      });
   }
 }
 
@@ -223,7 +282,13 @@ function deleteItem(itemId, category) {
     });
     
     if (itemKey) {
-      database.ref(`menu/${category}/${itemKey}`).remove();
+      database.ref(`menu/${category}/${itemKey}`).remove()
+        .then(() => {
+          console.log("Item deleted successfully");
+        })
+        .catch((error) => {
+          console.error("Error deleting item:", error);
+        });
     }
   });
 }
@@ -243,17 +308,12 @@ function toggleEditMode() {
     document.body.classList.add('edit-mode');
     toggleBtn.textContent = '❌ Exit Edit';
     toggleBtn.style.background = '#e74c3c';
+    attachEditDeleteListeners();
   } else {
     document.body.classList.remove('edit-mode');
     toggleBtn.textContent = '✏️ Edit Mode';
     toggleBtn.style.background = '#ff8c42';
   }
-  
-  // Reload menu to show/hide edit buttons
-  const menuRef = database.ref('menu');
-  menuRef.once('value').then((snapshot) => {
-    displayMenu(snapshot.val());
-  });
 }
 
 // ---------------- UTILITY FUNCTIONS ----------------
@@ -261,8 +321,57 @@ function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
+// ---------------- PWA INSTALLATION ----------------
+window.addEventListener('beforeinstallprompt', (e) => {
+  console.log('beforeinstallprompt event fired');
+  // Prevent the mini-infobar from appearing on mobile
+  e.preventDefault();
+  // Stash the event so it can be triggered later
+  deferredPrompt = e;
+  
+  // Show the install banner
+  const banner = document.getElementById('app-notification-banner');
+  banner.classList.add('slide-in');
+  
+  // Remove the banner after 10 seconds if not clicked
+  setTimeout(() => {
+    if (banner.classList.contains('slide-in')) {
+      banner.classList.remove('slide-in');
+    }
+  }, 10000);
+});
+
+// Install button click handler
+document.getElementById('installBtn').addEventListener('click', async () => {
+  console.log('Install button clicked');
+  const banner = document.getElementById('app-notification-banner');
+  
+  if (deferredPrompt) {
+    // Show the install prompt
+    deferredPrompt.prompt();
+    
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response to the install prompt: ${outcome}`);
+    
+    // Hide the install banner
+    banner.classList.remove('slide-in');
+    
+    // We've used the prompt, and can't use it again, throw it away
+    deferredPrompt = null;
+  }
+});
+
+// Close banner button
+document.querySelector('.close-banner-btn').addEventListener('click', () => {
+  const banner = document.getElementById('app-notification-banner');
+  banner.classList.remove('slide-in');
+});
+
 // ---------------- EVENT LISTENERS ----------------
 document.addEventListener('DOMContentLoaded', function() {
+  console.log("DOM loaded, initializing app...");
+  
   // Load menu
   loadMenu();
   
@@ -311,52 +420,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const itemModal = document.getElementById('itemModal');
     const deleteModal = document.getElementById('deleteModal');
     
-    if (e.target === itemModal) {
-      closeModal();
-    }
-    if (e.target === deleteModal) {
-      closeDeleteModal();
-    }
+    if (e.target === itemModal) closeModal();
+    if (e.target === deleteModal) closeDeleteModal();
   });
 });
-
-// ---------------- PWA INSTALLATION ----------------
-let deferredPrompt;
-
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-
-  const banner = document.getElementById("app-notification-banner");
-  banner.classList.add("slide-in");
-
-  const installBtn = document.getElementById("installBtn");
-
-  installBtn.addEventListener("click", async () => {
-    banner.classList.remove("slide-in");
-    banner.style.transform = "translateX(-50%) translateY(120%)";
-
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-
-    deferredPrompt = null;
-  });
-});
-
-// ---------------- CLOSE BANNER ----------------
-document.querySelector(".close-banner-btn").addEventListener("click", () => {
-  const banner = document.getElementById("app-notification-banner");
-  banner.style.transform = "translateX(-50%) translateY(120%)";
-  banner.style.opacity = "0";
-  setTimeout(() => banner.remove(), 400);
-});
-
-setTimeout(() => {
-  const banner = document.getElementById("app-notification-banner");
-  if (banner) banner.classList.add("slide-in");
-}, 1000);
 
 // ---------------- SERVICE WORKER ----------------
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js");
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js')
+      .then(function(registration) {
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      }, function(err) {
+        console.log('ServiceWorker registration failed: ', err);
+      });
+  });
 }
