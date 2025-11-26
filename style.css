@@ -1,0 +1,98 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #fff7e6;
+  margin: 0;
+  padding: 0;
+}
+
+/* HEADER */
+header {
+  background: #d14224;
+  color: white;
+  text-align: center;
+  padding: 20px;
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+.tagline {
+  font-style: italic;
+}
+.hours {
+  background: rgba(0,0,0,0.2);
+  display: inline-block;
+  padding: 5px 15px;
+  border-radius: 8px;
+}
+
+/* CRUD FORM */
+.crud-box {
+  background: white;
+  margin: 20px;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.crud-box input,
+.crud-box select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+.crud-box button {
+  width: 100%;
+  padding: 10px;
+  background: #d14224;
+  color: white;
+  border: none;
+  border-radius: 8px;
+}
+
+/* MENU GRID */
+.grid {
+  display: grid;
+  gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  padding: 20px;
+}
+.card {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+.card button {
+  width: 48%;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  margin-top: 5px;
+}
+.editBtn { background: #ffcc00; }
+.delBtn { background: #d14224; color: white; }
+
+/* INSTALL BANNER */
+.app-notification-banner {
+  position: fixed;
+  top: -100px;
+  width: 100%;
+  background: #ffa726;
+  padding: 15px;
+  text-align: center;
+  font-size: 18px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  transition: 0.4s;
+}
+.app-notification-banner.slide-in {
+  top: 0;
+}
+.close-banner-btn {
+  background: black;
+  color: white;
+  border: none;
+  font-size: 20px;
+  padding: 5px 10px;
+  border-radius: 50%;
+}
