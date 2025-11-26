@@ -1,8 +1,6 @@
-// ---------------- FIREBASE INIT ----------------
+// ---------------- FIREBASE ----------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { 
-  getDatabase, ref, push, onValue, update, remove 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCGg-TXDVDfMsQnypWvC8kKWWp85WPrUgg",
@@ -20,124 +18,144 @@ const db = getDatabase(app);
 const menuRef = ref(db, "menu");
 
 
-// ---------------- PRELOADED MENU ----------------
-const defaultMenu = [
-  { name: "Chicken & Fries Burrito", price: 145, category: "burrito" },
-  { name: "Sausage & Egg Burrito", price: 135, category: "burrito" },
-  { name: "Beef Burrito", price: 155, category: "burrito" },
-  { name: "Pork Burrito", price: 145, category: "burrito" },
+// ---------------- ELEMENTS ----------------
+const foodList = document.getElementById("food-list");
 
-  { name: "Beef Birria (1 piece)", price: 180, category: "birria" },
-  { name: "Beef Birria (2 pieces)", price: 260, category: "birria" },
-  { name: "Chicken Birria (1 piece)", price: 180, category: "birria" },
-  { name: "Chicken Birria (2 pieces)", price: 260, category: "birria" },
+const crudModal = document.getElementById("crudModal");
+const deleteModal = document.getElementById("deleteModal");
 
-  { name: "Beef Quesadilla", price: 130, category: "quesadilla" },
-  { name: "Chicken Quesadilla", price: 120, category: "quesadilla" },
-  { name: "Cheesy Quesadilla", price: 100, category: "quesadilla" },
-  { name: "Spinach Quesadilla", price: 140, category: "quesadilla" }
-];
+const modalTitle = document.getElementById("modalTitle");
+const saveBtn = document.getElementById("saveBtn");
 
-// Insert default menu only if database is empty
-onValue(menuRef, (snapshot) => {
-  if (!snapshot.exists()) {
-    defaultMenu.forEach(item => push(menuRef, item));
-  }
-});
-
-
-// ---------------- FORM ELEMENTS ----------------
 const nameInput = document.getElementById("food-name");
 const priceInput = document.getElementById("food-price");
 const categoryInput = document.getElementById("food-category");
-const list = document.getElementById("food-list");
-const addBtn = document.getElementById("addFoodBtn");
 
-let editId = null;
+let currentEditID = null;
+let deleteID = null;
 
 
-// ---------------- ADD / UPDATE ITEM ----------------
-addBtn.onclick = () => {
-  const name = nameInput.value.trim();
-  const price = Number(priceInput.value);
-  const category = categoryInput.value;
+// ---------------- OPEN ADD MODAL ----------------
+document.getElementById("openAddModal").onclick = () => {
+    modalTitle.textContent = "Add Food Item";
+    saveBtn.textContent = "Add";
+    currentEditID = null;
 
-  if (!name || !price || !category) {
-    alert("Please complete all fields");
-    return;
-  }
+    nameInput.value = "";
+    priceInput.value = "";
+    categoryInput.value = "";
 
-  if (editId === null) {
-    push(menuRef, { name, price, category });
-  } else {
-    update(ref(db, "menu/" + editId), { name, price, category });
-    editId = null;
-    addBtn.textContent = "Add Item";
-  }
-
-  nameInput.value = "";
-  priceInput.value = "";
-  categoryInput.value = "";
+    crudModal.classList.remove("hidden");
 };
 
 
-// ---------------- REALTIME DISPLAY ----------------
-onValue(menuRef, (snapshot) => {
-  list.innerHTML = "";
-  const data = snapshot.val();
+// ---------------- SAVE (ADD or UPDATE) ----------------
+saveBtn.onclick = () => {
+    const item = {
+        name: nameInput.value,
+        price: Number(priceInput.value),
+        category: categoryInput.value,
+    };
 
-  for (let id in data) {
-    const item = data[id];
+    if (!item.name || !item.price || !item.category) {
+        alert("Fill all fields.");
+        return;
+    }
 
-    list.innerHTML += `
-      <div class="card">
-        <h3>${item.name}</h3>
-        <p class="price">₱${item.price}</p>
-        <p>Category: ${item.category}</p>
+    if (currentEditID === null) {
+        push(menuRef, item);  // ADD
+    } else {
+        update(ref(db, "menu/" + currentEditID), item); // UPDATE
+    }
 
-        <button class="editBtn" onclick="editItem('${id}', '${item.name}', '${item.price}', '${item.category}')">Edit</button>
-        <button class="delBtn" onclick="deleteItem('${id}')">Delete</button>
-      </div>
-    `;
-  }
-});
+    crudModal.classList.add("hidden");
+};
+
+
+// ---------------- CANCEL CRUD MODAL ----------------
+document.getElementById("closeCrudModal").onclick = () => {
+    crudModal.classList.add("hidden");
+};
+
+
+// ---------------- OPEN DELETE MODAL ----------------
+window.deleteItem = (id) => {
+    deleteID = id;
+    deleteModal.classList.remove("hidden");
+};
+
+document.getElementById("closeDeleteModal").onclick = () => {
+    deleteModal.classList.add("hidden");
+};
+
+document.getElementById("confirmDelete").onclick = () => {
+    remove(ref(db, "menu/" + deleteID));
+    deleteModal.classList.add("hidden");
+};
 
 
 // ---------------- EDIT ----------------
 window.editItem = (id, name, price, category) => {
-  editId = id;
-  nameInput.value = name;
-  priceInput.value = price;
-  categoryInput.value = category;
-  addBtn.textContent = "Update Item";
+    currentEditID = id;
+
+    modalTitle.textContent = "Edit Food Item";
+    saveBtn.textContent = "Update";
+
+    nameInput.value = name;
+    priceInput.value = price;
+    categoryInput.value = category;
+
+    crudModal.classList.remove("hidden");
 };
 
 
-// ---------------- DELETE ----------------
-window.deleteItem = (id) => {
-  if (!confirm("Delete this item?")) return;
-  remove(ref(db, "menu/" + id));
-};
+// ---------------- DISPLAY REAL-TIME ----------------
+onValue(menuRef, (snapshot) => {
+    foodList.innerHTML = "";
+    const data = snapshot.val();
+
+    for (let id in data) {
+        const item = data[id];
+
+        foodList.innerHTML += `
+            <div class="card">
+                <h3>${item.name}</h3>
+                <p>₱${item.price}</p>
+                <small>${item.category}</small>
+                <br><br>
+
+                <button class="editBtn" onclick="editItem('${id}', '${item.name}', '${item.price}', '${item.category}')">Edit</button>
+                <button class="delBtn" onclick="deleteItem('${id}')">Delete</button>
+            </div>
+        `;
+    }
+});
 
 
-// ---------------- PWA INSTALL BANNER ----------------
+// ---------------- INSTALL BANNER ----------------
 let deferredPrompt;
-const banner = document.getElementById("app-notification-banner");
+const banner = document.getElementById("install-banner");
 const installBtn = document.getElementById("installBtn");
 
 window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  banner.classList.add("slide-in");
+    e.preventDefault();
+    deferredPrompt = e;
+    banner.classList.remove("hidden");
 });
 
+// install
 installBtn.onclick = async () => {
-  banner.classList.remove("slide-in");
-  deferredPrompt.prompt();
+    banner.classList.add("hidden");
+    deferredPrompt.prompt();
+};
+
+// close banner
+document.getElementById("closeBanner").onclick = () => {
+    banner.classList.add("hidden");
 };
 
 
-// ---------------- REGISTER SW ----------------
+// ---------------- SERVICE WORKER ----------------
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js");
+    navigator.serviceWorker.register("sw.js");
 }

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Burrito Bytes Menu</title>
 
   <link rel="manifest" href="manifest.json">
@@ -10,45 +10,66 @@
 </head>
 <body>
 
-    <!-- Fancy Install Banner -->
-    <div id="app-notification-banner" class="app-notification-banner">
-        📱 Install the Burrito Bytes App!
-        <button id="installBtn">Install</button>
-        <button class="close-banner-btn">&times;</button>
+    <!-- INSTALL POPUP BANNER -->
+    <div id="install-banner" class="install-banner hidden">
+        <div class="banner-icon">📱</div>
+        <div class="banner-text">
+            <h3>Install Burrito Bytes Menu App</h3>
+            <p>for a better experience!</p>
+        </div>
+        <button id="installBtn" class="banner-button">Download Now</button>
+        <button id="closeBanner" class="banner-close">✖</button>
     </div>
 
+    
+    <!-- HEADER -->
     <header>
         <h1>🌯 Burrito Bytes</h1>
-        <p class="tagline">"LET'S TRY THE YUMMIEST AND TASTIEST BURRITO IN TOWN. WHERE EVERY BITE IS FLAVOR FIESTA"</p>
-        <p class="hours">🕒 Open Hours: 1 PM – 10 PM (MON–SUN)</p>
+        <p class="tagline">"LET'S TRY THE YUMMIEST AND TASTIEST BURRITO IN TOWN"</p>
+        <p class="hours">🕒 Open Hours: 11 AM – 10 PM</p>
     </header>
 
 
-    <!-- CRUD FORM -->
-    <section class="crud-box">
-        <h2>➕ Add / Update Menu Item</h2>
-
-        <input id="food-name" placeholder="Food Name">
-        <input id="food-price" placeholder="Price">
-        
-        <select id="food-category">
-            <option value="">Select Category</option>
-            <option value="burrito">Burrito</option>
-            <option value="birria">Birria</option>
-            <option value="quesadilla">Quesadilla</option>
-        </select>
-
-        <button id="addFoodBtn">Add Item</button>
-    </section>
-
-
-    <!-- MENU OUTPUT -->
+    <!-- MENU DISPLAY -->
     <section id="menu">
         <h2>🍽 Menu</h2>
+        <button id="openAddModal" class="add-btn">+ Add New Item</button>
         <div id="food-list" class="grid"></div>
     </section>
 
 
-  <script type="module" src="app.js"></script>
+    <!-- ADD/EDIT MODAL -->
+    <div class="modal hidden" id="crudModal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Add Food Item</h3>
+
+            <input id="food-name" placeholder="Food Name">
+            <input id="food-price" placeholder="Price" type="number">
+            <select id="food-category">
+                <option value="">Select Category</option>
+                <option value="burrito">Burrito</option>
+                <option value="birria">Birria</option>
+                <option value="quesadilla">Quesadilla</option>
+            </select>
+
+            <button id="saveBtn" class="modal-save">Save</button>
+            <button id="closeCrudModal" class="modal-cancel">Cancel</button>
+        </div>
+    </div>
+
+
+    <!-- DELETE CONFIRM MODAL -->
+    <div class="modal hidden" id="deleteModal">
+        <div class="modal-content delete-box">
+            <h3>Delete this item?</h3>
+            <p>This action cannot be undone.</p>
+
+            <button id="confirmDelete" class="delete-confirm">Delete</button>
+            <button id="closeDeleteModal" class="modal-cancel">Cancel</button>
+        </div>
+    </div>
+
+
+    <script type="module" src="app.js"></script>
 </body>
 </html>
