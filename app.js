@@ -26,7 +26,6 @@ function loadMenu() {
   menuRef.on('value', (snapshot) => {
     const menuData = snapshot.val();
     
-    // If no data in Firebase, initialize with default data
     if (!menuData) {
       initializeDefaultMenu();
       return;
@@ -135,6 +134,7 @@ function closeModal() {
   document.getElementById('itemId').value = '';
   currentEditingItem = null;
   document.getElementById('modalTitle').textContent = 'Add New Item';
+  document.getElementById('category').disabled = false;
 }
 
 function openDeleteModal() {
@@ -240,11 +240,11 @@ function toggleEditMode() {
   
   if (isEditMode) {
     document.body.classList.add('edit-mode');
-    toggleBtn.textContent = '❌ Exit Edit Mode';
+    toggleBtn.textContent = '❌ Exit Edit';
     toggleBtn.style.background = '#e74c3c';
   } else {
     document.body.classList.remove('edit-mode');
-    toggleBtn.textContent = '✏️ Edit Mode';
+    toggleBtn.textContent = '✏️ Edit';
     toggleBtn.style.background = '#ff8c42';
   }
   
@@ -266,11 +266,7 @@ document.addEventListener('DOMContentLoaded', function() {
   loadMenu();
   
   // Admin controls
-  document.getElementById('addItemBtn').addEventListener('click', () => {
-    document.getElementById('category').disabled = false;
-    openModal();
-  });
-  
+  document.getElementById('addItemBtn').addEventListener('click', openModal);
   document.getElementById('toggleEditBtn').addEventListener('click', toggleEditMode);
   
   // Modal events
@@ -310,16 +306,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const itemModal = document.getElementById('itemModal');
     const deleteModal = document.getElementById('deleteModal');
     
-    if (e.target === itemModal) {
-      closeModal();
-    }
-    if (e.target === deleteModal) {
-      closeDeleteModal();
-    }
+    if (e.target === itemModal) closeModal();
+    if (e.target === deleteModal) closeDeleteModal();
   });
 });
 
-// ---------------- PWA INSTALLATION ----------------
+// ---------------- PWA INSTALLATION (KEEP EXISTING) ----------------
 let deferredPrompt;
 
 window.addEventListener("beforeinstallprompt", (e) => {
@@ -342,7 +334,6 @@ window.addEventListener("beforeinstallprompt", (e) => {
   });
 });
 
-// ---------------- CLOSE BANNER ----------------
 document.querySelector(".close-banner-btn").addEventListener("click", () => {
   const banner = document.getElementById("app-notification-banner");
   banner.style.transform = "translateX(-50%) translateY(120%)";
@@ -355,7 +346,6 @@ setTimeout(() => {
   if (banner) banner.classList.add("slide-in");
 }, 1000);
 
-// ---------------- SERVICE WORKER ----------------
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js");
 }

@@ -37,53 +37,59 @@
 
   <section id="menu"></section>
 
-  <!-- Modal for Add/Edit -->
-  <div id="itemModal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2 id="modalTitle">Add New Item</h2>
-      <form id="itemForm">
-        <input type="hidden" id="itemId">
-        
-        <div class="form-group">
-          <label for="category">Category:</label>
-          <select id="category" required>
-            <option value="">Select Category</option>
-            <option value="burrito">Burrito</option>
-            <option value="birria">Birria Tacos</option>
-            <option value="quesadilla">Quesadilla</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label for="name">Item Name:</label>
-          <input type="text" id="name" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="price">Price (₱):</label>
-          <input type="number" id="price" min="0" required>
-        </div>
-        
-        <div class="form-actions">
-          <button type="submit" id="saveBtn">Save Item</button>
-          <button type="button" id="cancelBtn">Cancel</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Delete Confirmation Modal -->
-  <div id="deleteModal" class="modal">
-    <div class="modal-content">
-      <h2>Confirm Delete</h2>
-      <p>Are you sure you want to delete "<span id="deleteItemName"></span>"?</p>
-      <div class="form-actions">
-        <button id="confirmDeleteBtn" class="delete-btn">Delete</button>
-        <button id="cancelDeleteBtn">Cancel</button>
+  <!-- Add/Edit Modal -->
+<div id="itemModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2 id="modalTitle">Add New Item</h2>
+    <form id="itemForm">
+      <input type="hidden" id="itemId">
+      
+      <div class="form-group">
+        <label for="category">Category:</label>
+        <select id="category" required>
+          <option value="">Select Category</option>
+          <option value="burrito">Burrito</option>
+          <option value="birria">Birria Tacos</option>
+          <option value="quesadilla">Quesadilla</option>
+        </select>
       </div>
+      
+      <div class="form-group">
+        <label for="name">Item Name:</label>
+        <input type="text" id="name" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="price">Price (₱):</label>
+        <input type="number" id="price" min="0" required>
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" id="saveBtn">Save Item</button>
+        <button type="button" id="cancelBtn">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+  <div class="modal-content">
+    <h2>Confirm Delete</h2>
+    <p>Are you sure you want to delete "<span id="deleteItemName"></span>"?</p>
+    <div class="form-actions">
+      <button id="confirmDeleteBtn" class="delete-btn">Delete</button>
+      <button id="cancelDeleteBtn">Cancel</button>
     </div>
   </div>
+</div>
+
+<!-- Admin Controls -->
+<div class="admin-controls">
+  <button id="addItemBtn" class="admin-btn">+ Add Item</button>
+  <button id="toggleEditBtn" class="admin-btn">✏️ Edit</button>
+</div>
 
   <script src="app.js"></script>
 </body>
