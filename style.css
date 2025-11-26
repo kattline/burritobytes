@@ -1,97 +1,192 @@
-/* INSTALL BANNER */
-.install-banner {
+/* ---------------- ADMIN CONTROLS ---------------- */
+.admin-controls {
   position: fixed;
   top: 20px;
   right: 20px;
-  width: 350px;
-  background: #ffe9c1;
-  border: 1px solid #ffc271;
-  padding: 15px;
+  z-index: 1000;
   display: flex;
-  gap: 12px;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-  animation: slideIn 0.3s ease;
+  gap: 10px;
 }
-.hidden { display: none; }
 
-.banner-icon {
-  font-size: 35px;
-}
-.banner-text h3 {
-  margin: 0;
-  font-size: 18px;
-}
-.banner-button {
-  background: #ff8a32;
-  border: none;
-  padding: 8px 15px;
+.admin-btn {
+  background: #ff8c42;
   color: white;
+  border: none;
+  padding: 10px 15px;
   border-radius: 8px;
   cursor: pointer;
-}
-.banner-close {
-  margin-left: auto;
-  background: none;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
-  color: #ff5a36;
-}
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transition: 0.2s;
 }
 
+.admin-btn:hover {
+  background: #ff7a1f;
+  transform: translateY(-2px);
+}
 
-/* MODAL */
+/* ---------------- MODAL STYLES ---------------- */
 .modal {
+  display: none;
   position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.modal-content {
-  background: white;
-  padding: 20px;
-  width: 320px;
-  border-radius: 15px;
-  animation: pop 0.25s ease;
-}
-@keyframes pop {
-  from { transform: scale(0.8); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-.modal input, .modal select {
+  z-index: 2000;
+  left: 0;
+  top: 0;
   width: 100%;
-  padding: 10px;
-  margin-bottom: 8px;
-}
-.modal-save {
-  width: 100%;
-  padding: 10px;
-  background: #ff8a32;
-  color: white;
-  border: none;
-  border-radius: 8px;
-}
-.modal-cancel {
-  width: 100%;
-  margin-top: 8px;
-  padding: 8px;
-  background: #ddd;
-  border: none;
-  border-radius: 8px;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  backdrop-filter: blur(5px);
 }
 
-/* DELETE BOX */
-.delete-confirm {
+.modal-content {
+  background-color: #fff8f0;
+  margin: 10% auto;
+  padding: 30px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  position: absolute;
+  right: 20px;
+  top: 15px;
+}
+
+.close:hover {
+  color: #d35400;
+}
+
+/* ---------------- FORM STYLES ---------------- */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #5a3e2b;
+}
+
+.form-group input,
+.form-group select {
   width: 100%;
-  padding: 10px;
-  background: #d9382a;
-  color: white;
+  padding: 12px;
+  border: 2px solid #ff9e4a;
+  border-radius: 10px;
+  font-size: 16px;
+  background: white;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #d35400;
+  box-shadow: 0 0 0 3px rgba(211, 84, 0, 0.1);
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 25px;
+}
+
+.form-actions button {
+  padding: 12px 24px;
   border: none;
   border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+#saveBtn, #confirmDeleteBtn {
+  background: #d35400;
+  color: white;
+}
+
+#saveBtn:hover, #confirmDeleteBtn:hover {
+  background: #b84300;
+}
+
+#cancelBtn, #cancelDeleteBtn {
+  background: #95a5a6;
+  color: white;
+}
+
+#cancelBtn:hover, #cancelDeleteBtn:hover {
+  background: #7f8c8d;
+}
+
+.delete-btn {
+  background: #e74c3c !important;
+}
+
+.delete-btn:hover {
+  background: #c0392b !important;
+}
+
+/* ---------------- EDIT MODE STYLES ---------------- */
+.edit-mode .card {
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.edit-mode .card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.card-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: none;
+  gap: 5px;
+}
+
+.edit-mode .card-actions {
+  display: flex;
+}
+
+.edit-btn, .delete-card-btn {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.edit-btn {
+  background: #3498db;
+  color: white;
+}
+
+.edit-btn:hover {
+  background: #2980b9;
+}
+
+.delete-card-btn {
+  background: #e74c3c;
+  color: white;
+}
+
+.delete-card-btn:hover {
+  background: #c0392b;
 }

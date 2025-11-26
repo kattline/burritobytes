@@ -1,7 +1,4 @@
-// ---------------- FIREBASE ----------------
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
+// ---------------- FIREBASE CONFIGURATION ----------------
 const firebaseConfig = {
   apiKey: "AIzaSyCGg-TXDVDfMsQnypWvC8kKWWp85WPrUgg",
   authDomain: "burrito-bytes.firebaseapp.com",
@@ -13,149 +10,352 @@ const firebaseConfig = {
   measurementId: "G-3NSJ2FNC2F"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const menuRef = ref(db, "menu");
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
 
+// ---------------- GLOBAL VARIABLES ----------------
+let isEditMode = false;
+let currentEditingItem = null;
+let itemsToDelete = null;
 
-// ---------------- ELEMENTS ----------------
-const foodList = document.getElementById("food-list");
+// ---------------- LOAD MENU FROM FIREBASE ----------------
+function loadMenu() {
+  const menuRef = database.ref('menu');
+  
+  menuRef.on('value', (snapshot) => {
+    const menuData = snapshot.val();
+    
+    // If no data in Firebase, initialize with default data
+    if (!menuData) {
+      initializeDefaultMenu();
+      return;
+    }
+    
+    displayMenu(menuData);
+  });
+}
 
-const crudModal = document.getElementById("crudModal");
-const deleteModal = document.getElementById("deleteModal");
+// ---------------- INITIALIZE DEFAULT MENU ----------------
+function initializeDefaultMenu() {
+  const defaultMenu = {
+    burrito: [
+      { id: generateId(), name: "Chicken & Fries Burrito", price: 145 },
+      { id: generateId(), name: "Sausage & Egg Burrito", price: 135 },
+      { id: generateId(), name: "Beef Burrito", price: 155 },
+      { id: generateId(), name: "Pork Burrito", price: 145 }
+    ],
+    birria: [
+      { id: generateId(), name: "Beef Birria (1 piece)", price: 180 },
+      { id: generateId(), name: "Beef Birria (2 pieces)", price: 260 },
+      { id: generateId(), name: "Chicken Birria (1 piece)", price: 180 },
+      { id: generateId(), name: "Chicken Birria (2 pieces)", price: 260 }
+    ],
+    quesadilla: [
+      { id: generateId(), name: "Beef Quesadilla", price: 130 },
+      { id: generateId(), name: "Chicken Quesadilla", price: 120 },
+      { id: generateId(), name: "Cheesy Quesadilla", price: 100 },
+      { id: generateId(), name: "Spinach Quesadilla", price: 140 }
+    ]
+  };
+  
+  database.ref('menu').set(defaultMenu);
+}
 
-const modalTitle = document.getElementById("modalTitle");
-const saveBtn = document.getElementById("saveBtn");
+// ---------------- DISPLAY MENU ----------------
+function displayMenu(menuData) {
+  const menuSection = document.getElementById("menu");
 
-const nameInput = document.getElementById("food-name");
-const priceInput = document.getElementById("food-price");
-const categoryInput = document.getElementById("food-category");
+  const html = `
+    <h2>🌯 Burrito</h2>
+    <div class="grid">
+      ${(menuData.burrito || []).map(item => createCardHTML(item, 'burrito')).join("")}
+    </div>
 
-let currentEditID = null;
-let deleteID = null;
+    <h2>🌮 Birria Tacos</h2>
+    <div class="grid">
+      ${(menuData.birria || []).map(item => createCardHTML(item, 'birria')).join("")}
+    </div>
 
+    <h2>🧀 Quesadilla</h2>
+    <div class="grid">
+      ${(menuData.quesadilla || []).map(item => createCardHTML(item, 'quesadilla')).join("")}
+    </div>
+  `;
 
-// ---------------- OPEN ADD MODAL ----------------
-document.getElementById("openAddModal").onclick = () => {
-    modalTitle.textContent = "Add Food Item";
-    saveBtn.textContent = "Add";
-    currentEditID = null;
+  menuSection.innerHTML = html;
+  
+  // Add event listeners to action buttons
+  if (isEditMode) {
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const itemId = btn.closest('.card').dataset.id;
+        const category = btn.closest('.card').dataset.category;
+        editItem(itemId, category);
+      });
+    });
+    
+    document.querySelectorAll('.delete-card-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const itemId = btn.closest('.card').dataset.id;
+        const category = btn.closest('.card').dataset.category;
+        const itemName = btn.closest('.card').querySelector('h3').textContent;
+        confirmDelete(itemId, category, itemName);
+      });
+    });
+  }
+}
 
-    nameInput.value = "";
-    priceInput.value = "";
-    categoryInput.value = "";
+// ---------------- CREATE CARD HTML ----------------
+function createCardHTML(item, category) {
+  return `
+    <div class="card" data-id="${item.id}" data-category="${category}">
+      ${isEditMode ? `
+        <div class="card-actions">
+          <button class="edit-btn" title="Edit">✏️</button>
+          <button class="delete-card-btn" title="Delete">🗑️</button>
+        </div>
+      ` : ''}
+      <h3>${item.name}</h3>
+      <p class="price">₱${item.price}</p>
+    </div>
+  `;
+}
 
-    crudModal.classList.remove("hidden");
-};
+// ---------------- MODAL FUNCTIONS ----------------
+function openModal() {
+  document.getElementById('itemModal').style.display = 'block';
+}
 
+function closeModal() {
+  document.getElementById('itemModal').style.display = 'none';
+  document.getElementById('itemForm').reset();
+  document.getElementById('itemId').value = '';
+  currentEditingItem = null;
+  document.getElementById('modalTitle').textContent = 'Add New Item';
+}
 
-// ---------------- SAVE (ADD or UPDATE) ----------------
-saveBtn.onclick = () => {
-    const item = {
-        name: nameInput.value,
-        price: Number(priceInput.value),
-        category: categoryInput.value,
+function openDeleteModal() {
+  document.getElementById('deleteModal').style.display = 'block';
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').style.display = 'none';
+  itemsToDelete = null;
+}
+
+// ---------------- CRUD OPERATIONS ----------------
+function addItem(itemData) {
+  const { category, name, price } = itemData;
+  const newItem = {
+    id: generateId(),
+    name: name,
+    price: parseInt(price)
+  };
+  
+  database.ref(`menu/${category}`).push(newItem);
+}
+
+function editItem(itemId, category) {
+  const menuRef = database.ref('menu');
+  
+  menuRef.once('value').then((snapshot) => {
+    const menuData = snapshot.val();
+    const categoryItems = menuData[category];
+    
+    // Find the item by id
+    let itemToEdit = null;
+    let itemKey = null;
+    
+    Object.keys(categoryItems).forEach(key => {
+      if (categoryItems[key].id === itemId) {
+        itemToEdit = categoryItems[key];
+        itemKey = key;
+      }
+    });
+    
+    if (itemToEdit) {
+      currentEditingItem = { category, itemKey, itemId };
+      document.getElementById('modalTitle').textContent = 'Edit Item';
+      document.getElementById('itemId').value = itemId;
+      document.getElementById('category').value = category;
+      document.getElementById('name').value = itemToEdit.name;
+      document.getElementById('price').value = itemToEdit.price;
+      
+      // Disable category selection when editing
+      document.getElementById('category').disabled = true;
+      
+      openModal();
+    }
+  });
+}
+
+function updateItem(itemData) {
+  const { category, name, price } = itemData;
+  
+  if (currentEditingItem) {
+    const updatedItem = {
+      id: currentEditingItem.itemId,
+      name: name,
+      price: parseInt(price)
     };
+    
+    database.ref(`menu/${category}/${currentEditingItem.itemKey}`).set(updatedItem);
+  }
+}
 
-    if (!item.name || !item.price || !item.category) {
-        alert("Fill all fields.");
-        return;
+function deleteItem(itemId, category) {
+  const menuRef = database.ref('menu');
+  
+  menuRef.once('value').then((snapshot) => {
+    const menuData = snapshot.val();
+    const categoryItems = menuData[category];
+    
+    // Find the item key by id
+    let itemKey = null;
+    Object.keys(categoryItems).forEach(key => {
+      if (categoryItems[key].id === itemId) {
+        itemKey = key;
+      }
+    });
+    
+    if (itemKey) {
+      database.ref(`menu/${category}/${itemKey}`).remove();
     }
+  });
+}
 
-    if (currentEditID === null) {
-        push(menuRef, item);  // ADD
+function confirmDelete(itemId, category, itemName) {
+  itemsToDelete = { itemId, category };
+  document.getElementById('deleteItemName').textContent = itemName;
+  openDeleteModal();
+}
+
+// ---------------- TOGGLE EDIT MODE ----------------
+function toggleEditMode() {
+  isEditMode = !isEditMode;
+  const toggleBtn = document.getElementById('toggleEditBtn');
+  
+  if (isEditMode) {
+    document.body.classList.add('edit-mode');
+    toggleBtn.textContent = '❌ Exit Edit Mode';
+    toggleBtn.style.background = '#e74c3c';
+  } else {
+    document.body.classList.remove('edit-mode');
+    toggleBtn.textContent = '✏️ Edit Mode';
+    toggleBtn.style.background = '#ff8c42';
+  }
+  
+  // Reload menu to show/hide edit buttons
+  const menuRef = database.ref('menu');
+  menuRef.once('value').then((snapshot) => {
+    displayMenu(snapshot.val());
+  });
+}
+
+// ---------------- UTILITY FUNCTIONS ----------------
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
+
+// ---------------- EVENT LISTENERS ----------------
+document.addEventListener('DOMContentLoaded', function() {
+  // Load menu
+  loadMenu();
+  
+  // Admin controls
+  document.getElementById('addItemBtn').addEventListener('click', () => {
+    document.getElementById('category').disabled = false;
+    openModal();
+  });
+  
+  document.getElementById('toggleEditBtn').addEventListener('click', toggleEditMode);
+  
+  // Modal events
+  document.getElementById('itemForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const itemData = {
+      category: document.getElementById('category').value,
+      name: document.getElementById('name').value,
+      price: document.getElementById('price').value
+    };
+    
+    if (currentEditingItem) {
+      updateItem(itemData);
     } else {
-        update(ref(db, "menu/" + currentEditID), item); // UPDATE
+      addItem(itemData);
     }
-
-    crudModal.classList.add("hidden");
-};
-
-
-// ---------------- CANCEL CRUD MODAL ----------------
-document.getElementById("closeCrudModal").onclick = () => {
-    crudModal.classList.add("hidden");
-};
-
-
-// ---------------- OPEN DELETE MODAL ----------------
-window.deleteItem = (id) => {
-    deleteID = id;
-    deleteModal.classList.remove("hidden");
-};
-
-document.getElementById("closeDeleteModal").onclick = () => {
-    deleteModal.classList.add("hidden");
-};
-
-document.getElementById("confirmDelete").onclick = () => {
-    remove(ref(db, "menu/" + deleteID));
-    deleteModal.classList.add("hidden");
-};
-
-
-// ---------------- EDIT ----------------
-window.editItem = (id, name, price, category) => {
-    currentEditID = id;
-
-    modalTitle.textContent = "Edit Food Item";
-    saveBtn.textContent = "Update";
-
-    nameInput.value = name;
-    priceInput.value = price;
-    categoryInput.value = category;
-
-    crudModal.classList.remove("hidden");
-};
-
-
-// ---------------- DISPLAY REAL-TIME ----------------
-onValue(menuRef, (snapshot) => {
-    foodList.innerHTML = "";
-    const data = snapshot.val();
-
-    for (let id in data) {
-        const item = data[id];
-
-        foodList.innerHTML += `
-            <div class="card">
-                <h3>${item.name}</h3>
-                <p>₱${item.price}</p>
-                <small>${item.category}</small>
-                <br><br>
-
-                <button class="editBtn" onclick="editItem('${id}', '${item.name}', '${item.price}', '${item.category}')">Edit</button>
-                <button class="delBtn" onclick="deleteItem('${id}')">Delete</button>
-            </div>
-        `;
+    
+    closeModal();
+  });
+  
+  document.querySelector('.close').addEventListener('click', closeModal);
+  document.getElementById('cancelBtn').addEventListener('click', closeModal);
+  
+  // Delete modal events
+  document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+    if (itemsToDelete) {
+      deleteItem(itemsToDelete.itemId, itemsToDelete.category);
+      closeDeleteModal();
     }
+  });
+  
+  document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteModal);
+  
+  // Close modals when clicking outside
+  window.addEventListener('click', function(e) {
+    const itemModal = document.getElementById('itemModal');
+    const deleteModal = document.getElementById('deleteModal');
+    
+    if (e.target === itemModal) {
+      closeModal();
+    }
+    if (e.target === deleteModal) {
+      closeDeleteModal();
+    }
+  });
 });
 
-
-// ---------------- INSTALL BANNER ----------------
+// ---------------- PWA INSTALLATION ----------------
 let deferredPrompt;
-const banner = document.getElementById("install-banner");
-const installBtn = document.getElementById("installBtn");
 
 window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    banner.classList.remove("hidden");
+  e.preventDefault();
+  deferredPrompt = e;
+
+  const banner = document.getElementById("app-notification-banner");
+  banner.classList.add("slide-in");
+
+  const installBtn = document.getElementById("installBtn");
+
+  installBtn.addEventListener("click", async () => {
+    banner.classList.remove("slide-in");
+    banner.style.transform = "translateX(-50%) translateY(120%)";
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+
+    deferredPrompt = null;
+  });
 });
 
-// install
-installBtn.onclick = async () => {
-    banner.classList.add("hidden");
-    deferredPrompt.prompt();
-};
+// ---------------- CLOSE BANNER ----------------
+document.querySelector(".close-banner-btn").addEventListener("click", () => {
+  const banner = document.getElementById("app-notification-banner");
+  banner.style.transform = "translateX(-50%) translateY(120%)";
+  banner.style.opacity = "0";
+  setTimeout(() => banner.remove(), 400);
+});
 
-// close banner
-document.getElementById("closeBanner").onclick = () => {
-    banner.classList.add("hidden");
-};
-
+setTimeout(() => {
+  const banner = document.getElementById("app-notification-banner");
+  if (banner) banner.classList.add("slide-in");
+}, 1000);
 
 // ---------------- SERVICE WORKER ----------------
 if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js");
+  navigator.serviceWorker.register("sw.js");
 }
